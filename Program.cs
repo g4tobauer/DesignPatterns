@@ -1,5 +1,6 @@
 ﻿using DesignPatterns.DesignPatterns;
 using DesignPatterns.DesignPatterns.AbstractFactory.Classes;
+using DesignPatterns.DesignPatterns.Adapter.Classes;
 using DesignPatterns.DesignPatterns.ChainOfResponsability.Classes;
 
 namespace DesignPatterns
@@ -13,6 +14,7 @@ namespace DesignPatterns
 
         private static IRunner GetRunner()
         {
+            return new AdapterRunner();
             return new AbstractFactoryRunner();
             return new ChainOfResponsabilityRunner();
         }
