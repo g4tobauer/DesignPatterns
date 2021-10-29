@@ -1,9 +1,7 @@
 ﻿using DesignPatterns.DesignPatterns.Adapter.Classes.Adapters;
 using DesignPatterns.DesignPatterns.Adapter.Classes.GraphicsCards;
 using DesignPatterns.DesignPatterns.Adapter.Classes.Monitors;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using DesignPatterns.Structures.Runner;
 
 namespace DesignPatterns.DesignPatterns.Adapter.Classes
 {

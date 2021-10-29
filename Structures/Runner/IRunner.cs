@@ -1,4 +1,4 @@
-﻿namespace DesignPatterns.DesignPatterns
+﻿namespace DesignPatterns.Structures.Runner
 {
     public interface IRunner
     {
