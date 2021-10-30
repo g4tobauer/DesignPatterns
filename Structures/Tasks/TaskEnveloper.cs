@@ -1,26 +1,23 @@
-﻿using System;
+﻿using DesignPatterns.Structures.Runner;
+using DesignPatterns.Structures.Singleton;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DesignPatterns.Structures.Tasks
 {
-    public sealed class TaskEnveloper
+    public class TaskEnveloper : Single<TaskEnveloper>
     {
         private static readonly List<Task> _lstTasks = new List<Task>();
 
-        public static int CountTasks { get { return _lstTasks.Count; } }
-        public TaskEnveloper()
-        {
-        }
+        public int CountTasks { get { return _lstTasks.Count; } }
 
-        public static void CreateTask(object obj)
+        public void CreateTask(TaskRunner taskRunner)
         {
-            var task = new Task(ActionMethod, obj);
+            var task = new Task(ActionMethod, taskRunner);
             _lstTasks.Add(task);
         }
 
-        public static void StartAllTasks()
+        public void StartAllTasks()
         {
             _lstTasks.ForEach(task =>
             {
@@ -33,53 +30,43 @@ namespace DesignPatterns.Structures.Tasks
             });
         }
 
-        public static void WaitAllTasks()
+        public void WaitAllTasks()
         {
             Task.WaitAll(_lstTasks.ToArray());
         }
 
-        public class Teste
+        private class TaskEnveloperExecutable
         {
-            private static int NextId = 0;
-
-            public Teste()
-            {
-                Id = NextId++;
-            }
-
             public static int Index { get; set; }
-            public int Id { get; private set; }
-            public string MyProperty { get; set; }
-            public bool StopTeste { get; set; }
+            public bool StopExecutable { get; set; }
         }
 
-        public static void ActionMethod(object obj)
+        private void ActionMethod(object obj)
         {
-            Teste teste = (Teste)obj;
-            int count = 4000;
+            TaskRunner taskRunner = (TaskRunner)obj;
+            TaskEnveloperExecutable executable = new TaskEnveloperExecutable();
 
-            while (!teste.StopTeste)
+            while (!executable.StopExecutable)
             {
                 if (CountTasks == 0) break;
-                lock (teste)
+                lock (executable)
                 {
-                    if (teste.StopTeste)
+                    if (executable.StopExecutable)
                     {
-                        ++Teste.Index;
+                        ++TaskEnveloperExecutable.Index;
                         break;
                     }
 
-                    while (teste.Id != Teste.Index) ;
-                    //Console.WriteLine(string.Format("Contador: {0} - Id: {1}", count, teste.Id));
+                    if(taskRunner.IsSynchronized)
+                    {
+                        while (taskRunner.Id != TaskEnveloperExecutable.Index) ;
+                    }
 
-                    --count;
-                    if (count < 0) teste.StopTeste = true;
+                    StructureRunner.RunStructure(taskRunner);
+                    executable.StopExecutable = true;
 
-
-                    if (Teste.Index == (CountTasks - 1))
-                        Teste.Index = 0;
-                    else
-                        ++Teste.Index;
+                    if (TaskEnveloperExecutable.Index == (CountTasks - 1)) TaskEnveloperExecutable.Index = 0;
+                    else ++TaskEnveloperExecutable.Index;
 
                     Task.Yield();
                 }

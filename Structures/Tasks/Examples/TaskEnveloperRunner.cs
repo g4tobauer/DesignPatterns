@@ -6,7 +6,6 @@ namespace DesignPatterns.Structures.Tasks.Examples
 {
     class TaskEnveloperRunner : IRunner
     {
-
         public void Run()
         {
             var timer = new Stopwatch();
@@ -23,11 +22,20 @@ namespace DesignPatterns.Structures.Tasks.Examples
 
             timer = new Stopwatch();
 
+            TaskRunner taskRunner1 = new TaskRunner();
+            taskRunner1.Executable = new Executable { Name = "exec1" };
+
+            TaskRunner taskRunner2 = new TaskRunner();
+            taskRunner2.Executable = new Executable {Name = "exec2" };
+
+            //taskRunner1.IsSynchronized = true;
+            //taskRunner2.IsSynchronized = true;
+
             timer.Start();
-            TaskEnveloper.CreateTask(new TaskEnveloper.Teste());
-            TaskEnveloper.CreateTask(new TaskEnveloper.Teste());
-            TaskEnveloper.StartAllTasks();
-            TaskEnveloper.WaitAllTasks();
+            TaskEnveloper.Instance.CreateTask(taskRunner1);
+            TaskEnveloper.Instance.CreateTask(taskRunner2);
+            TaskEnveloper.Instance.StartAllTasks();
+            TaskEnveloper.Instance.WaitAllTasks();
             timer.Stop();
 
             timeTaken = timer.Elapsed;
