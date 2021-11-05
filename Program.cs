@@ -14,13 +14,13 @@ namespace DesignPatterns
 {
     class Program
     {
-
         static void Main(string[] args)
         {
             //StructureRunner.RunStructure(new AdapterRunner());
             //StructureRunner.RunStructure(new AbstractFactoryRunner());
             //StructureRunner.RunStructure(new ChainOfResponsabilityRunner());
             StructureRunner.RunStructure(new TaskEnveloperRunner());
+            //Teste();
         }
     }
 }

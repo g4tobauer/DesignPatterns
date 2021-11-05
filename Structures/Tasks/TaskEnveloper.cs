@@ -1,76 +1,95 @@
 ﻿using DesignPatterns.Structures.Runner;
 using DesignPatterns.Structures.Singleton;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DesignPatterns.Structures.Tasks
 {
     public class TaskEnveloper : Single<TaskEnveloper>
     {
-        private static readonly List<Task> _lstTasks = new List<Task>();
+        private readonly List<Task> _lstTasks = new List<Task>();
+        private readonly List<Task> _lstTasksQueue = new List<Task>();
 
-        public int CountTasks { get { return _lstTasks.Count; } }
+
 
         public void CreateTask(TaskRunner taskRunner)
         {
-            var task = new Task(ActionMethod, taskRunner);
-            _lstTasks.Add(task);
+            TaskLocker.Instance.EnqueueTaskRunner(taskRunner);
+            AddTask(new Task(ActionMethod, taskRunner));
         }
 
         public void StartAllTasks()
         {
             _lstTasks.ForEach(task =>
             {
-                switch(task.Status)
-                {
-                    case TaskStatus.Created:
-                        task.Start();
-                        break;
-                }
+                StartTask(task);
             });
         }
 
         public void WaitAllTasks()
         {
-            Task.WaitAll(_lstTasks.ToArray());
+            var taskIndex = Task.WaitAny(_lstTasks.ToArray());
+            if (taskIndex < 0) return;
+
+            lock (TaskLocker.Instance)
+            {
+                RemoveTask(taskIndex);
+            }
+            WaitAllTasks();
         }
 
-        private class TaskEnveloperExecutable
+        private void AddTask(Task task)
         {
-            public static int Index { get; set; }
-            public bool StopExecutable { get; set; }
+            if (_lstTasks.Count < 8)
+            {
+                _lstTasks.Add(task);
+            }
+            else if (!_lstTasksQueue.Contains(task)) _lstTasksQueue.Add(task);
+        }
+
+        private void StartTask(Task task)
+        {
+            switch (task.Status)
+            {
+                case TaskStatus.Created:
+                    task.Start();
+                    break;
+            }
+        }
+
+        private void RemoveTask(int index)
+        {
+            _lstTasks.Remove(_lstTasks[index]);
+            if (_lstTasksQueue.Any())
+            {
+                var task = _lstTasksQueue.First();
+                _lstTasksQueue.Remove(task);
+                AddTask(task);
+                StartAllTasks();
+            }
         }
 
         private void ActionMethod(object obj)
         {
             TaskRunner taskRunner = (TaskRunner)obj;
-            TaskEnveloperExecutable executable = new TaskEnveloperExecutable();
 
-            while (!executable.StopExecutable)
+            while (!taskRunner.IsFinished)
             {
-                if (CountTasks == 0) break;
-                lock (executable)
+                lock (TaskLocker.Instance)
                 {
-                    if (executable.StopExecutable)
+                    if(TaskLocker.Instance.HasTheLock(taskRunner))
                     {
-                        ++TaskEnveloperExecutable.Index;
-                        break;
+                        StructureRunner.RunStructure(taskRunner);
+                        TaskLocker.Instance.DequeueTaskRunner();
+                        if (!taskRunner.IsFinished)
+                            TaskLocker.Instance.EnqueueTaskRunner(taskRunner);
                     }
-
-                    if(taskRunner.IsSynchronized)
-                    {
-                        while (taskRunner.Id != TaskEnveloperExecutable.Index) ;
-                    }
-
-                    StructureRunner.RunStructure(taskRunner);
-                    executable.StopExecutable = true;
-
-                    if (TaskEnveloperExecutable.Index == (CountTasks - 1)) TaskEnveloperExecutable.Index = 0;
-                    else ++TaskEnveloperExecutable.Index;
-
-                    Task.Yield();
                 }
             }
         }
+
     }
 }

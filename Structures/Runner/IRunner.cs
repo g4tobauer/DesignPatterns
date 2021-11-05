@@ -1,4 +1,7 @@
-﻿namespace DesignPatterns.Structures.Runner
+﻿using System.Collections;
+using System.Collections.Generic;
+
+namespace DesignPatterns.Structures.Runner
 {
     public interface IRunner
     {

@@ -1,39 +1,36 @@
 ﻿using DesignPatterns.Structures.Runner;
+using DesignPatterns.Structures.Singleton;
 using System;
 using System.Diagnostics;
 
 namespace DesignPatterns.Structures.Tasks.Examples
 {
-    class TaskEnveloperRunner : IRunner
+    class TaskEnveloperRunner : Single<TaskEnveloperRunner>, IRunner
     {
         public void Run()
         {
             var timer = new Stopwatch();
 
-            timer.Start();
-            for (int i = 0; i < 8000; i++)
-            {
-                //Console.WriteLine(string.Format("Contador: {0}", i));
-            }
-            timer.Stop();
+            //timer.Start();
+            //for (int i = 0; i < 800000; i++)
+            //{
+            //    //Console.WriteLine(string.Format("Contador: {0}", i));
+            //}
+            //timer.Stop();
 
             TimeSpan timeTaken = timer.Elapsed;
-            Console.WriteLine("Time taken: " + timeTaken.ToString(@"m\:ss\.fff"));
+            //Console.WriteLine("Time taken: " + timeTaken.ToString(@"m\:ss\.fff"));
 
-            timer = new Stopwatch();
-
-            TaskRunner taskRunner1 = new TaskRunner();
-            taskRunner1.Executable = new Executable { Name = "exec1" };
-
-            TaskRunner taskRunner2 = new TaskRunner();
-            taskRunner2.Executable = new Executable {Name = "exec2" };
-
-            //taskRunner1.IsSynchronized = true;
-            //taskRunner2.IsSynchronized = true;
+            //timer = new Stopwatch();
 
             timer.Start();
-            TaskEnveloper.Instance.CreateTask(taskRunner1);
-            TaskEnveloper.Instance.CreateTask(taskRunner2);
+            for (int i=0; i<2; i++)
+            {
+                TaskRunner task = new TaskRunner { IsSynchronized = true };
+                task.Executable = new Executable { Name = string.Format("exec{0}", i) };
+                TaskEnveloper.Instance.CreateTask(task);
+            }
+
             TaskEnveloper.Instance.StartAllTasks();
             TaskEnveloper.Instance.WaitAllTasks();
             timer.Stop();

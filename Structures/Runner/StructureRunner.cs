@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DesignPatterns.Structures.Runner
+﻿namespace DesignPatterns.Structures.Runner
 {
     public static class StructureRunner
     {
